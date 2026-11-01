@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carnival Auction Intel</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%23060021'/%3E%3Cpath fill='%23D7F205' d='M3 1h2v1H3zM2 2h4v1H2zM1 3h6v1H1z'/%3E%3Cpath fill='%2300A9F0' d='M2 4h1v3H2zM5 4h1v3H5z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script>try { const t = localStorage.getItem('carnival-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#signals" aria-label="Carnival home">
+      <svg class="logo" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+        <path fill="var(--accent)" d="M3 1h2v1H3zM2 2h4v1H2zM1 3h6v1H1z"/>
+        <path fill="var(--cyan-bright)" d="M2 4h1v3H2zM5 4h1v3H5z"/>
+        <path fill="currentColor" opacity=".35" d="M3 5h2v2H3z"/>
+      </svg>
+      <span class="brand-name">CARNIVAL</span>
+      <span class="brand-sub">// AUCTION&nbsp;INTELLIGENCE</span>
+    </a>
+    <div class="top-status">
+      <span id="mode-chip" class="chip chip-dark"></span>
+      <span id="tg-chip" class="chip chip-dark"></span>
+      <span class="clock"><span class="eyebrow">Next scan</span><span id="next-scan" class="mono">--:--:--</span></span>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle light / dark theme" title="Toggle theme">
+        <svg viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 1h2v2H7zM7 13h2v2H7zM1 7h2v2H1zM13 7h2v2h-2zM5 5h6v6H5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <a role="tab" href="#signals" data-tab="signals"><span class="tab-n">01</span>Signals</a>
+    <a role="tab" href="#tracking" data-tab="tracking"><span class="tab-n">02</span>Tracking</a>
+    <a role="tab" href="#playbook" data-tab="playbook"><span class="tab-n">03</span>Playbook</a>
+    <a role="tab" href="#pricelist" data-tab="pricelist"><span class="tab-n">04</span>Price list</a>
+    <a role="tab" href="#telegram" data-tab="telegram"><span class="tab-n">05</span>Telegram</a>
+  </nav>
+
+  <main>
+    <!-- 01 SIGNALS -->
+    <section id="page-signals" class="page" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow accent">01 — Signals</p>
+          <h1>Auctions under your price&nbsp;list.</h1>
+          <p class="lede" id="signals-lede">Keyword scan every 3 hours. Every bid is converted to landed SGD (bid + shipping + GST) and checked against your target.</p>
+        </div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Verdict filter" id="verdict-filter">
+          <button type="button" data-v="deal,watch" aria-pressed="true">Deal + watch</button>
+          <button type="button" data-v="deal">Deal</button>
+          <button type="button" data-v="watch">Watch</button>
+          <button type="button" data-v="over">Over</button>
+          <button type="button" data-v="">All</button>
+        </div>
+        <label class="select"><span class="eyebrow">Keyword</span><select id="kw-filter"><option value="">All keywords</option></select></label>
+        <span class="spacer"></span>
+        <span class="muted small" id="last-scan"></span>
+        <button class="btn btn-primary" type="button" id="scan-now">Scan now <span aria-hidden="true">→</span></button>
+      </div>
+      <div class="table-wrap">
+        <table class="data" id="listings-table">
+          <thead><tr>
+            <th>Verdict</th><th>Listing</th><th class="num">Bid</th><th class="num">Landed now</th>
+            <th class="num">Pred. final</th><th class="num">Target</th><th class="num">Chance under</th>
+            <th class="num">Bids</th><th class="num">Ends</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="empty" id="listings-empty" hidden>Nothing matches. Run a scan or widen the filter.</p>
+      </div>
+    </section>
+
+    <!-- 02 TRACKING -->
+    <section id="page-tracking" class="page" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow accent">02 — Tracking</p>
+          <h1>Every 5 minutes, until it&nbsp;sells.</h1>
+          <p class="lede">Paste a listing. Carnival snapshots price and bids on a schedule, checks once more in the last 90 seconds, records the final price, and messages you before it closes.</p>
+        </div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+      <form class="track-form" id="track-form">
+        <label class="field grow"><span class="eyebrow">eBay link or item number</span>
+          <input id="track-url" type="text" inputmode="url" placeholder="https://www.ebay.com/itm/123456789012" required autocomplete="off"></label>
+        <label class="field"><span class="eyebrow">Target landed S$ (optional)</span>
+          <input id="track-target" type="number" min="1" step="1" placeholder="from price list"></label>
+        <button class="btn btn-primary" type="submit">Track <span aria-hidden="true">→</span></button>
+      </form>
+      <div class="split">
+        <aside class="panel list-panel">
+          <div class="panel-head">
+            <div class="seg small" role="group" aria-label="Tracked filter" id="tracked-filter">
+              <button type="button" data-s="active" aria-pressed="true">Live</button>
+              <button type="button" data-s="ended">Sold / ended</button>
+            </div>
+            <span class="muted small" id="tracked-count"></span>
+          </div>
+          <ul class="tracked-list" id="tracked-list"></ul>
+        </aside>
+        <article class="panel detail" id="detail">
+          <p class="empty">Pick an auction on the left, or paste a link above.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 03 PLAYBOOK -->
+    <section id="page-playbook" class="page" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow accent">03 — Playbook</p>
+          <h1>How each seller's auctions&nbsp;close.</h1>
+          <p class="lede">Learned from every auction tracked to the end: when the price really moves, which end windows run cheap, and which sellers close above or below the typical price.</p>
+        </div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+      <div class="toolbar">
+        <label class="select"><span class="eyebrow">Seller / auctioneer</span><select id="pb-seller"><option value="">All sellers</option></select></label>
+        <label class="select"><span class="eyebrow">Item</span><select id="pb-keyword"><option value="">All items</option></select></label>
+        <span class="spacer"></span>
+        <span class="muted small" id="pb-n"></span>
+      </div>
+      <div class="playbook-grid">
+        <div class="panel tips-panel">
+          <div class="panel-head"><h2>Plays</h2></div>
+          <ol class="tips" id="pb-tips"></ol>
+        </div>
+        <div class="panel model-panel" id="pb-model"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Share of the final price already bid, by time left</h2>
+            <p class="muted small">Median line, with the middle 50% of auctions shaded. The steeper the drop at the right edge, the more the auction is decided by snipers.</p>
+          </div>
+          <button class="btn btn-ghost small" type="button" data-table-toggle="pb-curve">Table</button>
+        </div>
+        <div class="legend" id="pb-curve-legend"></div>
+        <div id="pb-curve"></div>
+        <div class="table-wrap" id="pb-curve-table" hidden></div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head"><div><h2>End window vs typical price</h2><p class="muted small">By hour the auction ends (SGT). Final price relative to the item's median.</p></div></div>
+          <div id="pb-blocks"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>End day vs typical price</h2><p class="muted small">By weekday the auction ends (SGT).</p></div></div>
+          <div id="pb-dow"></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head"><h2>Sellers</h2></div>
+          <div class="table-wrap"><table class="data" id="pb-sellers"></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Items</h2></div>
+          <div class="table-wrap"><table class="data" id="pb-keywords"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 PRICE LIST -->
+    <section id="page-pricelist" class="page" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow accent">04 — Price list</p>
+          <h1>What you'll pay, in&nbsp;SGD.</h1>
+          <p class="lede" id="pricelist-lede">Targets are landed cost: winning bid + shipping to Singapore + GST, in SGD. Each active row is searched every scan.</p>
+        </div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+      <form class="track-form" id="watch-form">
+        <label class="field grow"><span class="eyebrow">Keyword (eBay search syntax, e.g. <code>seiko skx007 -parts</code>)</span>
+          <input id="watch-keyword" type="text" required minlength="2" autocomplete="off"></label>
+        <label class="field"><span class="eyebrow">Target landed S$</span>
+          <input id="watch-target" type="number" min="1" step="1" required></label>
+        <button class="btn btn-primary" type="submit">Add <span aria-hidden="true">→</span></button>
+      </form>
+      <div class="table-wrap">
+        <table class="data" id="watch-table">
+          <thead><tr>
+            <th>Keyword</th><th class="num">Target S$</th><th>Marketplace</th><th class="center">Auto-track</th><th class="center">Active</th>
+            <th class="num">Live</th><th class="num">Deals</th><th class="num">Sold (learned)</th><th class="num">Last scan</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 05 TELEGRAM -->
+    <section id="page-telegram" class="page" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow accent">05 — Telegram</p>
+          <h1>Signals to your&nbsp;phone.</h1>
+          <p class="lede">Deals from each scan, alerts before tracked auctions end, and a note with the final price when they sell. Reply to the bot with <code>/track &lt;link&gt;</code> to add one from your phone.</p>
+        </div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+      <div class="two-col">
+        <div class="panel" id="tg-status"></div>
+        <div class="panel">
+          <div class="panel-head"><h2>Setup</h2></div>
+          <ol class="steps">
+            <li>In Telegram, message <b>@BotFather</b> → <code>/newbot</code> → copy the token.</li>
+            <li>Put it in <code>.env</code> as <code>TELEGRAM_BOT_TOKEN=…</code> and restart Carnival.</li>
+            <li>Open your bot and send <code>/start</code>. The first chat to do so becomes the only chat it talks to.</li>
+            <li>Press <b>Send test</b>. Commands: <code>/deals</code> <code>/ending</code> <code>/list</code> <code>/track</code> <code>/scan</code> <code>/pricelist</code> <code>/add</code>.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Signal log</h2><span class="muted small">Everything Carnival sent (or would have sent).</span></div>
+        <ul class="feed" id="feed"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="mono small muted" id="foot-fx"></span>
+    <span class="mono small muted" id="foot-api"></span>
+  </footer>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
